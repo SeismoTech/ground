@@ -47,6 +47,10 @@ public class Bits {
     LE16_ON_BYTES.set(xs, off, v);
   }
 
+  public static void le16(byte[] xs, int off, char v) {
+    LE16_ON_BYTES.set(xs, off, (short) v);
+  }
+
   public static final VarHandle LE32_ON_BYTES
     = MethodHandles.byteArrayViewVarHandle(
       int[].class, ByteOrder.LITTLE_ENDIAN);
@@ -103,6 +107,21 @@ public class Bits {
       off += 4;  width -= 4;  v >>>= 32;
     }
     le32tail(xs, off, width, (int) v);
+  }
+
+  //----------------------------------------------------------------------
+  // Coping from/to byte[] to/from X[] (for X a primitive type) and String
+
+  public static void copy(byte[] src, int soff, char[] trg, int toff, int len) {
+    for (int i = 0; i < len; i++) trg[toff+i] = (char) le16(src, soff+2*i);
+  }
+
+  public static void copy(char[] src, int soff, byte[] trg, int toff, int len) {
+    for (int i = 0; i < len; i++) le16(trg, toff+2*i, src[soff+i]);
+  }
+
+  public static void copy(String src, int soff, byte[] trg, int toff, int len) {
+    for (int i = 0; i < len; i++) le16(trg, toff+2*i, src.charAt(soff+i));
   }
 
   //----------------------------------------------------------------------
