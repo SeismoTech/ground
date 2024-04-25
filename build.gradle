@@ -1,0 +1,38 @@
+plugins {
+  id 'java-library'
+  id 'maven-publish'
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.0'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params:5.5.0'
+  testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.5.0'
+}
+
+tasks.withType(JavaCompile) {
+  configure(options) {
+    options.compilerArgs
+      << '-Xlint:deprecation' << '-Xlint:unchecked' << '-Xdiags:verbose'
+  }
+}
+
+test {
+  useJUnitPlatform()
+  testLogging {
+    events'standardOut', 'standardError'
+    exceptionFormat = 'full'
+  }
+}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      artifactId = project.name
+      from components.java
+    }
+  }
+}
