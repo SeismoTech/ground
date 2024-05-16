@@ -19,6 +19,14 @@ public class DMath {
   //----------------------------------------------------------------------
   // Log2 like operations
 
+  public static boolean isPow2(int n) {
+    return (n & (n-1)) == 0;
+  }
+
+  public static boolean isPow2(long n) {
+    return (n & (n-1)) == 0;
+  }
+
   /**
    * Number of bits to write down {@code n}
    */

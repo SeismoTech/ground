@@ -1,6 +1,7 @@
 plugins {
   id 'java-library'
   id 'maven-publish'
+  id 'me.champeau.jmh' version '0.7.2'
 }
 
 repositories {
@@ -25,6 +26,17 @@ test {
   testLogging {
     events'standardOut', 'standardError'
     exceptionFormat = 'full'
+  }
+  jvmArgs [
+    '-XX:+UseParallelGC',
+    '-Xmx16g',
+  ]
+}
+
+jmh {
+  //-Pjmhinc=XXXBenchmark
+  if (rootProject.hasProperty('jmhinc')) {
+    includes = [jmhinc]
   }
 }
 
