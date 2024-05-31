@@ -46,7 +46,9 @@ import java.util.function.Consumer;
  * that will have `E`s on leaves and `Node`s on internal nodes.
  * Leaves have `.height` = 0.
  */
-public class BTreeList<E> extends AbstractList<E> implements List<E> {
+public class BTreeList<E>
+  extends AbstractList<E>
+  implements List<E>, Cloneable {
 
   public static final int DEFAULT_ORDER = 64;
 
@@ -58,6 +60,11 @@ public class BTreeList<E> extends AbstractList<E> implements List<E> {
   public BTreeList(int order) {
     this.order = order;
     this.root = newNode(0);
+  }
+
+  public BTreeList(int order, Node root) {
+    this.order = order;
+    this.root = root;
   }
 
   //----------------------------------------------------------------------
@@ -476,6 +483,26 @@ public class BTreeList<E> extends AbstractList<E> implements List<E> {
   }
 
   //----------------------------------------------------------------------
+  @Override
+  public BTreeList<E> clone() {
+    return new BTreeList<>(order, clone(root));
+  }
+
+  private Node clone(Node src) {
+    final Node trg = newNode(src.height);
+    trg.size = src.size;
+    trg.used = src.used;
+    if (src.height == 0) arraycopy(src.data,0, trg.data,0, src.used);
+    else {
+      for (int i = 0; i < src.used; i++) {
+        final Node child = clone((Node) src.data[i]);
+        child.parent = trg;
+        trg.data[i] = child;
+      }
+    }
+    return trg;
+  }
+
   @Override
   public void forEach(Consumer<? super E> action) {
     final int height = root.height;

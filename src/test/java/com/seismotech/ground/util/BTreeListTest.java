@@ -160,6 +160,22 @@ class BTreeListTest {
 
   //----------------------------------------------------------------------
   @Test
+  void cloneTest() {
+    final int ORDER = 64;
+    final int MAX_SIZE = 2*ORDER*ORDER;
+    final BTreeList<Integer> xs = new BTreeList<>(ORDER);
+    BTreeList<Integer> ys = xs.clone();
+    checkInvariants(ys.root, ORDER);
+    assertEquals(xs, ys);
+    for (int i = 0; i <= MAX_SIZE; i++) {
+      xs.add(i);
+      ys = xs.clone();
+      checkInvariants(ys.root, ORDER);
+      assertEquals(xs, ys);
+    }
+  }
+
+  @Test
   void forEachTest() {
     final int ORDER = 64;
     final int MAX_SIZE = 2*ORDER*ORDER;

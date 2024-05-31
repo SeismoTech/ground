@@ -8,24 +8,34 @@ import org.openjdk.jmh.annotations.*;
 
 /**
  * JDK21 Hotspot
-.arrayList          100  thrpt    2  1284322.115          ops/s
-.arrayList         1000  thrpt    2   123184.332          ops/s
-.arrayList        10000  thrpt    2    12412.408          ops/s
-.arrayListBulk      100  thrpt    2  9221121.590          ops/s
-.arrayListBulk     1000  thrpt    2  1077141.289          ops/s
-.arrayListBulk    10000  thrpt    2    95897.264          ops/s
-.bTreeList          100  thrpt    2   910278.485          ops/s
-.bTreeList         1000  thrpt    2    48077.738          ops/s
-.bTreeList        10000  thrpt    2     4091.983          ops/s
-.bTreeListBulk      100  thrpt    2  1263486.697          ops/s
-.bTreeListBulk     1000  thrpt    2   131385.667          ops/s
-.bTreeListBulk    10000  thrpt    2    13151.630          ops/s
-.linkedList         100  thrpt    2  1334187.773          ops/s
-.linkedList        1000  thrpt    2   113400.460          ops/s
-.linkedList       10000  thrpt    2     9302.391          ops/s
-.linkedListBulk     100  thrpt    2  1819036.262          ops/s
-.linkedListBulk    1000  thrpt    2   185546.607          ops/s
-.linkedListBulk   10000  thrpt    2    18342.747          ops/s
+.arrayList           100  thrpt    2   1545634.948          ops/s
+.arrayList          1000  thrpt    2    146189.592          ops/s
+.arrayList         10000  thrpt    2     14823.490          ops/s
+.arrayListBulk       100  thrpt    2  10822826.077          ops/s
+.arrayListBulk      1000  thrpt    2   1227450.912          ops/s
+.arrayListBulk     10000  thrpt    2    112663.217          ops/s
+.arrayListClone      100  thrpt    2  25007321.307          ops/s
+.arrayListClone     1000  thrpt    2   2856107.132          ops/s
+.arrayListClone    10000  thrpt    2    263498.721          ops/s
+.bTreeList           100  thrpt    2    770305.253          ops/s
+.bTreeList          1000  thrpt    2     86993.757          ops/s
+.bTreeList         10000  thrpt    2      5805.286          ops/s
+.bTreeListBulk       100  thrpt    2   1429956.103          ops/s
+.bTreeListBulk      1000  thrpt    2    157965.555          ops/s
+.bTreeListBulk     10000  thrpt    2     16176.339          ops/s
+.bTreeListClone      100  thrpt    2   5936360.334          ops/s
+.bTreeListClone     1000  thrpt    2    763392.874          ops/s
+.bTreeListClone    10000  thrpt    2     59796.919          ops/s
+.linkedList          100  thrpt    2   1623816.751          ops/s
+.linkedList         1000  thrpt    2    136469.870          ops/s
+.linkedList        10000  thrpt    2     11851.564          ops/s
+.linkedListBulk      100  thrpt    2   2197598.689          ops/s
+.linkedListBulk     1000  thrpt    2    223013.270          ops/s
+.linkedListBulk    10000  thrpt    2     21879.108          ops/s
+.linkedListClone     100  thrpt    2   1824433.081          ops/s
+.linkedListClone    1000  thrpt    2    169324.598          ops/s
+.linkedListClone   10000  thrpt    2     14858.212          ops/s
+
  *
  * When `add(E e)` was implemented with `insert(lsize(), e)`,
  * the performance was much worse:
@@ -42,12 +52,20 @@ public class BTreeListAddBenchmark {
   @Param({"100", "1000", "10000"})
   int size;
 
-  ArrayList<Integer> all;
+  ArrayList<Integer> src;
+  LinkedList<Integer> linkedSrc;
+  BTreeList<Integer> btreeSrc;
 
   @Setup
   public void prepareBulk() {
-    all = new ArrayList<>();
-    for (int i = 0; i < size; i++) all.add(i);
+    src = new ArrayList<>();
+    linkedSrc = new LinkedList<>();
+    btreeSrc = new BTreeList<>(64);
+    for (int i = 0; i < size; i++) {
+      src.add(i);
+      linkedSrc.add(i);
+      btreeSrc.add(i);
+    }
   }
 
   @Benchmark
@@ -74,21 +92,36 @@ public class BTreeListAddBenchmark {
   @Benchmark
   public ArrayList<Integer> arrayListBulk() {
     final ArrayList<Integer> xs = new ArrayList<>();
-    xs.addAll(all);
+    xs.addAll(src);
     return xs;
   }
 
   @Benchmark
   public LinkedList<Integer> linkedListBulk() {
     final LinkedList<Integer> xs = new LinkedList<>();
-    xs.addAll(all);
+    xs.addAll(src);
     return xs;
   }
 
   @Benchmark
   public BTreeList<Integer> bTreeListBulk() {
     final BTreeList<Integer> xs = new BTreeList<>(64);
-    xs.addAll(all);
+    xs.addAll(src);
     return xs;
+  }
+
+  @Benchmark
+  public Object arrayListClone() {
+    return src.clone();
+  }
+
+  @Benchmark
+  public Object linkedListClone() {
+    return linkedSrc.clone();
+  }
+
+  @Benchmark
+  public BTreeList<Integer> bTreeListClone() {
+    return btreeSrc.clone();
   }
 }
