@@ -503,6 +503,31 @@ public class BTreeList<E>
     return trg;
   }
 
+  public static <T> Cloner<T> cloner() {return new Cloner<>();}
+
+  public static interface Builder<T> {
+    void use(int order, Node node);
+  }
+
+  public static class Cloner<T> implements Builder<T> {
+    BTreeList<T> list;
+
+    @Override
+    public void use(int order, Node node) {
+      list = new BTreeList<>(order, node);
+    }
+
+    public <E extends T> BTreeList<T> clone(BTreeList<E> src) {
+      src.clone(this);
+      return list;
+    }
+  }
+
+  public void clone(Builder<? super E> builder) {
+    builder.use(order, clone(root));
+  }
+
+  //----------------------------------------------------------------------
   @Override
   public void forEach(Consumer<? super E> action) {
     final int height = root.height;
