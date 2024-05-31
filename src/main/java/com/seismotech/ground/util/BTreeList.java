@@ -23,6 +23,9 @@ import java.util.function.Consumer;
  * Inserting an element in an arbitrary position is O(order + log n);
  * better that ArrayList (except at positions near the end) and LinkedList
  * both needing O(n).
+ * Intrinsically scanning operations (`forEach()`, `iterator().next()`)
+ * will perform worse with BTreeList than with ArrayList or LinkedList,
+ * as walking the b-tree is more complex.
  *
  * B-trees are usually used to implement maps and keys have an important
  * role in internal nodes.
@@ -510,14 +513,17 @@ public class BTreeList<E> extends AbstractList<E> implements List<E> {
   protected class BTreeIterator implements Iterator<E> {
     protected final int height;
     protected final int[] cursors;
+    protected int cursor0;
     protected int level;
     protected Node node;
 
     protected BTreeIterator() {
       this.height = root.height;
       this.cursors = new int[height+1];
+      this.cursor0 = 0;
       this.level = height;
       this.node = root;
+      if (height > 0) searchLeaf();
     }
 
     public boolean hasNext() {
@@ -527,24 +533,28 @@ public class BTreeList<E> extends AbstractList<E> implements List<E> {
     public E next() {
       if (ensureNext()) {
         @SuppressWarnings("unchecked")
-        final E elem = (E) node.data[cursors[0]++];
+        final E elem = (E) node.data[cursor0++];
         return elem;
       }
       return noNext();
     }
 
     protected boolean ensureNext() {
-      return (level == 0 && cursors[0] < node.used) || ensureNextLeaf();
+      return cursor0 < node.used || advanceLeaf();
     }
 
-    protected boolean ensureNextLeaf() {
+    protected boolean advanceLeaf() {
       if (level == 0) {
-        cursors[0] = 0;
+        cursor0 = 0;
         node = node.parent;
         level++;
         if (height == 0) return false;
         cursors[1]++;
       }
+      return searchLeaf();
+    }
+
+    protected boolean searchLeaf() {
       for (;;) {
         if (level == 0) {
           return true;
