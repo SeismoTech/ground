@@ -59,7 +59,7 @@ public class DMath {
    * ceil(log2(n)), n >= 0
    */
   public static int clog2(int n) {
-    return (32 - Long.numberOfLeadingZeros(n-1)) & 31;
+    return (32 - Integer.numberOfLeadingZeros(n-1)) & 31;
   }
 
   /**

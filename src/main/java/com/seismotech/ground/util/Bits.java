@@ -14,6 +14,8 @@ public class Bits {
   public static int ushort(short n) {return n & 0xFFFF;}
   public static long uint(int n) {return n & 0xFFFF_FFFFL;}
 
+  public static int ubyte(byte[] bs, int off) {return ubyte(bs[off]);}
+
   //----------------------------------------------------------------------
   // Combination
 

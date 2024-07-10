@@ -54,4 +54,22 @@ public class ArrayUtil {
   public static int length(byte[] xs) {
     return (xs == null) ? 0 : xs.length;
   }
+
+  //----------------------------------------------------------------------
+  public static boolean isPrefix(byte[] prefix, byte[] data) {
+    return isPrefix(prefix, 0, prefix.length, data, 0, data.length);
+  }
+
+  public static boolean isPrefix(byte[] prefix, int poff, int plen,
+      byte[] data, int doff, int dlen) {
+    return plen <= dlen && isPrefix(prefix,poff, data,doff, plen);
+  }
+
+  public static boolean isPrefix(byte[] prefix, int poff,
+      byte[] data, int doff, int len) {
+    for (int i = 0; i < len; i++) {
+      if (prefix[poff+i] != data[doff+i]) return false;
+    }
+    return true;
+  }
 }
