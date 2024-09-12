@@ -24,7 +24,7 @@ tasks.withType(JavaCompile) {
 }
 
 serviceLoader {
-  serviceInterface 'com.seismotech.ground.io.OpenDriver'
+  serviceInterface 'org.seismotech.ground.io.OpenDriver'
 }
 
 test {
