@@ -1,0 +1,125 @@
+package org.seismotech.ground.lang;
+
+import java.util.Objects;
+import java.util.Comparator;
+
+#set($inttypes = ["byte", "short", "char", "int", "long"])
+#set($arithtypes = $ppy.concat($inttypes, ["float", "double"]))
+#set($lowtypes = $ppy.concat(["boolean"], $arithtypes))
+#set($cmpops = $ppy.table(
+  ["name", "op", "iname", "iop"],
+  ["lt", "<", "gt", ">"],
+  ["le", "<=", "ge", ">="]
+))
+
+public class Comparisons {
+
+  //----------------------------------------------------------------------
+  // min and max values
+
+  public static final boolean MIN_BOOLEAN = false;
+  public static final boolean MAX_BOOLEAN = true;
+
+  #foreach($type in $arithtypes)
+  public static final $type MIN_${ppy.upcase($type)}
+    = ${ppy.java.boxedType($type)}.MIN_VALUE;
+  public static final $type MAX_${ppy.upcase($type)}
+    = ${ppy.java.boxedType($type)}.MAX_VALUE;
+  #end
+
+  //----------------------------------------------------------------------
+  // cmp
+
+  #foreach($type in $lowtypes)
+  public static int cmp($type a, $type b) {
+    return ${ppy.java.boxedType($type)}.compare(a, b);
+  }
+  #end
+
+  public static <T extends Comparable<T>> int cmp(T a, T b) {
+    return (a == null)
+      ? (b != null) ? -1 : 0
+      : (b == null) ? 1 : a.compareTo(b);
+  }
+
+  public static <T> int cmp(Comparator<T> cmp, T a, T b) {
+    return cmp.compare(a, b);
+  }
+
+  //----------------------------------------------------------------------
+  // eq
+
+  #foreach($type in $lowtypes)
+  public static boolean eq($type a, $type b) {return a == b;}
+  #end
+
+  public static boolean eq(Object a, Object b) {return Objects.equals(a, b);}
+
+  //----------------------------------------------------------------------
+  // lt, le, ge, gt
+
+  #foreach($op in $cmpops)
+
+    #foreach($type in $arithtypes)
+      public static boolean ${op.name}($type a, $type b) {
+        return a ${op.op} b;
+      }
+    #end
+
+    public static <T> boolean ${op.name}(Comparator<T> cmp, T a, T b) {
+      return cmp(cmp, a, b) ${op.op} 0;
+    }
+
+    #foreach($type in $lowtypes)
+      public static boolean ${op.iname}($type a, $type b) {
+        return ${op.name}(b, a);
+      }
+    #end
+    public static <T> boolean ${op.iname}(Comparator<T> cmp, T a, T b) {
+      return ${op.name}(cmp, b, a);
+    }
+    public static <T extends Comparable<T>> boolean ${op.iname}(T a, T b) {
+      return ${op.name}(b, a);
+    }
+  #end
+
+  public static boolean lt(boolean a, boolean b) {
+    return !a && b;
+  }
+  public static boolean le(boolean a, boolean b) {
+    return !a || b;
+  }
+
+  public static <T extends Comparable<T>> boolean lt(T a, T b) {
+    return b != null && (a == null || a.compareTo(b) < 0);
+  }
+  public static <T extends Comparable<T>> boolean le(T a, T b) {
+    return a == null || (b != null && a.compareTo(b) <= 0);
+  }
+
+  //----------------------------------------------------------------------
+  //llt and ggt
+  //Informal definition
+  //  llt = less less than = less than and not immediate
+  //  ggt = greater greater than = greater than and not immediate
+  //Formal definition assuming no data type limits:
+  //  llt(a,b) == a+1 < b == a < b-1
+  //  ggt(a,b) == llt(b,a)
+  //For types with wrapping:
+  //  llt(a,b) == a+1 < b && a < b+1
+
+  #foreach($type in ["byte", "short", "char"])
+  //This types are promoted to int to do math, therefore a+1 is not wrapping
+  public static boolean llt($type a, $type b) {return a+1 < b;}
+  #end
+
+  #foreach($type in ["int", "long"])
+  public static boolean llt($type a, $type b) {
+    return a + 1 < b && a < b - 1;
+  }
+  #end
+
+  #foreach($type in $inttypes)
+  public static boolean ggt($type a, $type b) {return llt(b, a);}
+  #end
+}
