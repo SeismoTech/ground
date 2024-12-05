@@ -1,5 +1,12 @@
 package org.seismotech.ground.util;
 
+#set($lowtypes = [
+  "boolean", "byte", "short", "char", "int", "long", "float", "double"
+])
+#set($alltypes = $ppy.table(
+  ["name", "arg"],
+  $ppy.transpose([$ppy.concat(["T"], $lowtypes), ["<T>"]], "")))
+
 public class XArray {
   private XArray() {}
 
@@ -51,25 +58,29 @@ public class XArray {
   }
 
   //----------------------------------------------------------------------
-  public static int length(byte[] xs) {
+  #foreach($T in $alltypes)
+  public static ${T.arg} int length(${T.name}[] xs) {
     return (xs == null) ? 0 : xs.length;
   }
+  #end
 
   //----------------------------------------------------------------------
-  public static boolean isPrefix(byte[] prefix, byte[] data) {
-    return isPrefix(prefix, 0, prefix.length, data, 0, data.length);
+  #foreach($T in $alltypes)
+  public static $T.arg boolean isPrefix(${T.name}[] prefix, ${T.name}[] data) {
+    return isPrefix(prefix, 0, length(prefix), data, 0, length(data));
   }
 
-  public static boolean isPrefix(byte[] prefix, int poff, int plen,
-      byte[] data, int doff, int dlen) {
+  public static $T.arg boolean isPrefix(${T.name}[] prefix, int poff, int plen,
+      ${T.name}[] data, int doff, int dlen) {
     return plen <= dlen && isPrefix(prefix,poff, data,doff, plen);
   }
 
-  public static boolean isPrefix(byte[] prefix, int poff,
-      byte[] data, int doff, int len) {
+  public static $T.arg boolean isPrefix(${T.name}[] prefix, int poff,
+      ${T.name}[] data, int doff, int len) {
     for (int i = 0; i < len; i++) {
       if (prefix[poff+i] != data[doff+i]) return false;
     }
     return true;
   }
+  #end
 }
