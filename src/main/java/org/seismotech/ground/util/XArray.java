@@ -1,7 +1,7 @@
 package org.seismotech.ground.util;
 
-public class ArrayUtil {
-  private ArrayUtil() {}
+public class XArray {
+  private XArray() {}
 
   public static final int MAX_SIZE = Integer.MAX_VALUE-2;
 
@@ -44,7 +44,7 @@ public class ArrayUtil {
    * but only if {@code used} is 0.
    */
   public static byte[] growFree(byte[] xs, int size, int used, int free) {
-    final int newsize = ArrayUtil.growSize(size, used, free);
+    final int newsize = growSize(size, used, free);
     final byte[] ys = new byte[newsize];
     if (xs != null) System.arraycopy(xs,0, ys,0, used);
     return ys;

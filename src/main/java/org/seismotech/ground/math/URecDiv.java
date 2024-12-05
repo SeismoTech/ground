@@ -1,6 +1,6 @@
 package org.seismotech.ground.math;
 
-import org.seismotech.ground.util.Bits;
+import org.seismotech.ground.mem.Bits;
 
 /**
  * Reciprocal division for unsigned integers.

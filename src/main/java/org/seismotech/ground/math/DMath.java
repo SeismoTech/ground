@@ -16,6 +16,10 @@ public class DMath {
     return d * cdiv(n,d);
   }
 
+  public static int multiples(int d, int from, int to) {
+    return (to-1)/d - cdiv(from,d) + 1;
+  }
+
   //----------------------------------------------------------------------
   // Log2 like operations
 

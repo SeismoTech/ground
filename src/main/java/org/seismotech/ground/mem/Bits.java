@@ -1,4 +1,4 @@
-package org.seismotech.ground.util;
+package org.seismotech.ground.mem;
 
 import java.lang.invoke.VarHandle;
 import java.lang.invoke.MethodHandles;
