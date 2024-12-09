@@ -1,0 +1,24 @@
+package org.seismotech.ground.cursor;
+
+#set($lowtypes = [
+  "boolean", "byte", "char", "short", "int", "long", "float", "double"
+])
+
+/**
+ * A cursor giving access to <i>monolithic</i> value of type {@code T}.
+ */
+public interface CursorOf<T> extends Cursor {
+  T value();
+
+  //----------------------------------------------------------------------
+  #foreach($type in $lowtypes)
+  #set($Type = $ppy.java.boxedType($type))
+  #set($Klass = $ppy.capitalize($type) + "s")
+
+  static interface $Klass extends CursorOf<$Type> {
+    $type ${type}Value();
+    @Override default $Type value() {return ${type}Value();}
+  }
+
+  #end
+}
