@@ -15,6 +15,8 @@ public class Bits {
   public static long uint(int n) {return n & 0xFFFF_FFFFL;}
 
   public static int ubyte(byte[] bs, int off) {return ubyte(bs[off]);}
+  public static int ushort(short[] xs, int off) {return ushort(xs[off]);}
+  public static long uint(int[] xs, int off) {return uint(xs[off]);}
 
   //----------------------------------------------------------------------
   // Combination
@@ -238,5 +240,52 @@ public class Bits {
     case 0: return tail;
     }
     return illegalTailWidth(3, len);
+  }
+
+  //----------------------------------------------------------------------
+  // Accessing short[] with bigger word sizes
+
+  public static int le32(short[] xs, int off) {
+    return ushort(xs,off) | (ushort(xs,off+1) << 16);
+  }
+
+  public static int le32tail(short[] xs, int off, int len) {
+    int tail = 0;
+    switch (len) {
+    case 1: tail = ushort(xs,off);
+    case 0: return tail;
+    }
+    return illegalTailWidth(1, len);
+  }
+
+  public static long le64(short[] xs, int off) {
+    return uint(le32(xs,off)) | (uint(le32(xs,off+2)) << 32);
+  }
+
+  public static long le64tail(short[] xs, int off, int len) {
+    long tail = 0;
+    switch (len) {
+    case 3: tail  = ((long) ushort(xs,off+2)) << 32;
+    case 2: tail |= ((long) ushort(xs,off+1)) << 16;
+    case 1: tail |= ushort(xs,off);
+    case 0: return tail;
+    }
+    return illegalTailWidth(3, len);
+  }
+
+  //----------------------------------------------------------------------
+  // Accessing int[] with bigger word sizes
+
+  public static long le64(int[] xs, int off) {
+    return uint(xs,off) | (uint(xs,off+1) << 32);
+  }
+
+  public static long le64tail(int[] xs, int off, int len) {
+    long tail = 0;
+    switch (len) {
+    case 1: tail = uint(xs,off);
+    case 0: return tail;
+    }
+    return illegalTailWidth(1, len);
   }
 }
