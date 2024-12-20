@@ -67,7 +67,7 @@ publishing {
       name = "GitHubPackages"
       url = uri("https://maven.pkg.github.com/SeismoTech/artifacts")
       credentials {
-        username = project.findProperty("github.actor") ?: System.getenv("GITHUB.ACTOR")
+        username = project.findProperty("github.actor") ?: System.getenv("GITHUB_ACTOR")
         password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
       }
     }
