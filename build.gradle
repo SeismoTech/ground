@@ -74,7 +74,7 @@ publishing {
   }
   publications {
     mavenJava(MavenPublication) {
-      artifactId = "seismo-${project.name}"
+      artifactId = "seismo-${project.name}-2"
       from components.java
     }
   }
