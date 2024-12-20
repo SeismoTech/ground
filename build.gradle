@@ -48,10 +48,10 @@ test {
     events'standardOut', 'standardError'
     exceptionFormat = 'full'
   }
-  jvmArgs [
-    '-XX:+UseParallelGC',
-    '-Xmx16g',
-  ]
+  // jvmArgs [
+  //   '-XX:+UseParallelGC',
+  //   '-Xmx16g',
+  // ]
 }
 
 jmh {

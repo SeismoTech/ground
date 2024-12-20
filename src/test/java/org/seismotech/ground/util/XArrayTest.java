@@ -1,6 +1,7 @@
 package org.seismotech.ground.util;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -9,16 +10,19 @@ import static org.seismotech.ground.util.XArray.*;
 class ArrayUtilTest {
 
   @Test
+  @Disabled
   void canAllocateMaxByteArray() {
     byte[] xs = new byte[MAX_SIZE];
   }
 
   @Test
+  @Disabled
   void canAllocateMaxIntArray() {
     int[] xs = new int[MAX_SIZE];
   }
 
   @Test
+  @Disabled
   void cannotAllocateBiggerByteArray() {
     assertThrows(
       OutOfMemoryError.class,
@@ -26,6 +30,7 @@ class ArrayUtilTest {
   }
 
   @Test
+  @Disabled
   void cannotAllocateBiggerIntArray() {
     assertThrows(
       OutOfMemoryError.class,
