@@ -62,9 +62,19 @@ jmh {
 }
 
 publishing {
+  repositories {
+    maven {
+      name = "GitHubPackages"
+      url = uri("https://maven.pkg.github.com/SeismoTech/artifacts")
+      credentials {
+        username = project.findProperty("github.actor") ?: System.getenv("GITHUB.ACTOR")
+        password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
+      }
+    }
+  }
   publications {
     mavenJava(MavenPublication) {
-      artifactId = project.name
+      artifactId = "seismo-${project.name}"
       from components.java
     }
   }
