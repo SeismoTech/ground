@@ -33,4 +33,21 @@ public interface CursorOf<T> extends Cursor {
   }
 
   #end
+
+  public static class ComparableComparator<T extends Comparable<T>>
+    implements Comparator<CursorOf<T>> {
+    @Override public int compare(CursorOf<T> a, CursorOf<T> b) {
+      return Comparisons.cmp(a.value(), b.value());
+    }
+  }
+
+  public static class AnyComparator<T> implements Comparator<CursorOf<T>> {
+    private final Comparator<T> cmp;
+
+    public AnyComparator(Comparator<T> cmp) {this.cmp = cmp;}
+
+    @Override public int compare(CursorOf<T> a, CursorOf<T> b) {
+      return Comparisons.cmp(cmp, a.value(), b.value());
+    }
+  }
 }
