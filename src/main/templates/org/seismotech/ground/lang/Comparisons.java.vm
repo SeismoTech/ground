@@ -5,6 +5,7 @@ import java.util.Comparator;
 
 #set($inttypes = ["byte", "short", "char", "int", "long"])
 #set($arithtypes = $ppy.concat($inttypes, ["float", "double"]))
+#set($mintypes = ["int", "long", "float", "double"])
 #set($lowtypes = $ppy.concat(["boolean"], $arithtypes))
 #set($cmpops = $ppy.table(
   ["name", "op", "iname", "iop"],
@@ -122,4 +123,42 @@ public class Comparisons {
   #foreach($type in $inttypes)
   public static boolean ggt($type a, $type b) {return llt(b, a);}
   #end
+
+  //----------------------------------------------------------------------
+  // min, max
+
+  public static boolean min(boolean a, boolean b) {return a & b;}
+  public static boolean max(boolean a, boolean b) {return a | b;}
+
+  #foreach($type in ["byte", "short", "char"])
+  public static $type min($type a, $type b) {
+    return ($type) min(a, b);
+  }
+  public static $type max($type a, $type b) {
+    return ($type) max(a, b);
+  }
+  #end
+
+  #foreach($type in $mintypes)
+  public static $type min($type a, $type b) {
+    return ${ppy.java.boxedType($type)}.min(a, b);
+  }
+  public static $type max($type a, $type b) {
+    return ${ppy.java.boxedType($type)}.max(a, b);
+  }
+  #end
+
+  public static <T extends Comparable<T>> T min(T a, T b) {
+    return le(a,b) ? a : b;
+  }
+  public static <T extends Comparable<T>> T max(T a, T b) {
+    return ge(a,b) ? a : b;
+  }
+
+  public static <T> T min(Comparator<T> cmp, T a, T b) {
+    return le(cmp,a,b) ? a : b;
+  }
+  public static <T> T max(Comparator<T> cmp, T a, T b) {
+    return ge(cmp,a,b) ? a : b;
+  }
 }

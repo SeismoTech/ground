@@ -4,6 +4,10 @@ package org.seismotech.ground.cursor;
   "boolean", "byte", "char", "short", "int", "long", "float", "double"
 ])
 
+import java.util.Comparator;
+
+import org.seismotech.ground.lang.Comparisons;
+
 /**
  * A cursor giving access to <i>monolithic</i> value of type {@code T}.
  */
@@ -18,6 +22,14 @@ public interface CursorOf<T> extends Cursor {
   static interface $Klass extends CursorOf<$Type> {
     $type ${type}Value();
     @Override default $Type value() {return ${type}Value();}
+  }
+
+  static class ${Klass}Comparator implements Comparator<$Klass> {
+    public static final ${Klass}Comparator THE = new ${Klass}Comparator();
+
+    @Override public int compare($Klass a, $Klass b) {
+      return Comparisons.cmp(a.${type}Value(), b.${type}Value());
+    }
   }
 
   #end
