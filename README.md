@@ -4,7 +4,7 @@ Ground: General ROUtiNes Definition
 Code shared across several projects of Seismo Technologies.
 
 We are not encouraging direct use of this code;
-probably, most of it can be found in other huge swiss-knife projects 
+probably, most of it can be found in other huge swiss-knife projects
 like Guava or Apache Common.
 We are making this open only because other more interesting projects are
 using it (for instance, [Hashish](https://github.com/SeismoTech/hashish)).
