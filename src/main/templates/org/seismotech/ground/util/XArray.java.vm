@@ -7,11 +7,64 @@ package org.seismotech.ground.util;
   ["name", "arg"],
   $ppy.transpose([$ppy.concat(["T"], $lowtypes), ["<T>"]], "")))
 
+import java.util.Arrays;
+
 public class XArray {
   private XArray() {}
 
   public static final int MAX_SIZE = Integer.MAX_VALUE-2;
 
+
+  //----------------------------------------------------------------------
+  #foreach($T in $alltypes)
+  public static $T.arg boolean isEmpty(${T.name}[] xs) {
+    return xs == null || xs.length == 0;
+  }
+
+  public static $T.arg int length(${T.name}[] xs) {
+    return (xs == null) ? 0 : xs.length;
+  }
+  #end
+
+  //----------------------------------------------------------------------
+  #foreach($T in $alltypes)
+  public static $T.arg boolean isPrefix(${T.name}[] prefix, ${T.name}[] data) {
+    return isPrefix(prefix, 0, length(prefix), data, 0, length(data));
+  }
+
+  public static $T.arg boolean isPrefix(${T.name}[] prefix, int poff, int plen,
+      ${T.name}[] data, int doff, int dlen) {
+    return plen <= dlen && isPrefix(prefix,poff, data,doff, plen);
+  }
+
+  public static $T.arg boolean isPrefix(${T.name}[] prefix, int poff,
+      ${T.name}[] data, int doff, int len) {
+    for (int i = 0; i < len; i++) {
+      if (prefix[poff+i] != data[doff+i]) return false;
+    }
+    return true;
+  }
+  #end
+
+  //----------------------------------------------------------------------
+  #foreach($T in $alltypes)
+  public static $T.arg void swap(${T.name}[] xs, int i, int j) {
+    final $T.name tmp = xs[i];  xs[i] = xs[j];  xs[j] = tmp;
+  }
+  #end
+
+  //----------------------------------------------------------------------
+  #foreach($T in $alltypes)
+  public static $T.arg ${T.name}[] concat(${T.name}[] xs, ${T.name}[] ys) {
+    if (isEmpty(xs)) return ys;
+    if (isEmpty(ys)) return xs;
+    final ${T.name}[] zs = Arrays.copyOf(xs, xs.length + ys.length);
+    System.arraycopy(ys,0, zs,xs.length, ys.length);
+    return zs;
+  }
+  #end
+
+  //----------------------------------------------------------------------
   /**
    * Size for a new array that will have {@code free} slots free.
    * Current array has {@code used} entries used
@@ -56,38 +109,4 @@ public class XArray {
     if (xs != null) System.arraycopy(xs,0, ys,0, used);
     return ys;
   }
-
-  //----------------------------------------------------------------------
-  #foreach($T in $alltypes)
-  public static ${T.arg} int length(${T.name}[] xs) {
-    return (xs == null) ? 0 : xs.length;
-  }
-  #end
-
-  //----------------------------------------------------------------------
-  #foreach($T in $alltypes)
-  public static $T.arg void swap(${T.name}[] xs, int i, int j) {
-    final $T.name tmp = xs[i];  xs[i] = xs[j];  xs[j] = tmp;
-  }
-  #end
-
-  //----------------------------------------------------------------------
-  #foreach($T in $alltypes)
-  public static $T.arg boolean isPrefix(${T.name}[] prefix, ${T.name}[] data) {
-    return isPrefix(prefix, 0, length(prefix), data, 0, length(data));
-  }
-
-  public static $T.arg boolean isPrefix(${T.name}[] prefix, int poff, int plen,
-      ${T.name}[] data, int doff, int dlen) {
-    return plen <= dlen && isPrefix(prefix,poff, data,doff, plen);
-  }
-
-  public static $T.arg boolean isPrefix(${T.name}[] prefix, int poff,
-      ${T.name}[] data, int doff, int len) {
-    for (int i = 0; i < len; i++) {
-      if (prefix[poff+i] != data[doff+i]) return false;
-    }
-    return true;
-  }
-  #end
 }
