@@ -72,4 +72,21 @@ public class DMath {
   public static int clog2(long n) {
     return (64 - Long.numberOfLeadingZeros(n-1)) & 63;
   }
+
+  //----------------------------------------------------------------------
+  // Sign extension
+
+  /** {@code n} is a {@code w} bits 2's complement signed integer.
+   * Extend sign to an int (32 bits signed integer) */
+  public static int signExtend(int n, int w) {
+    int mask = 1 << (w-1);
+    return (n ^ mask) - mask;
+  }
+
+  /** {@code n} is a {@code w} bits 2's complement signed integer.
+   * Extend sign to a long (64 bits signed integer) */
+  public static long signExtend(long n, int w) {
+    long mask = 1L << (w-1);
+    return (n ^ mask) - mask;
+  }
 }

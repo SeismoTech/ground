@@ -20,4 +20,14 @@ class DMathTest {
       assertEquals((int) Math.ceil(log), DMath.clog2((long) i));
     }
   }
+
+  @Test
+  void testSignExtend() {
+    final int W = 10;
+    final int M = (1 << W) - 1;
+    for (int n = -(M >> 1) - 1; n < (M >> 1); n++) {
+      assertEquals(n, DMath.signExtend(n & M, W));
+      assertEquals(n, DMath.signExtend((long)(n & M), W));
+    }
+  }
 }
