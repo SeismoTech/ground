@@ -1,0 +1,21 @@
+package org.seismotech.ground.lang;
+
+import java.lang.reflect.Array;
+
+#set($lowtypes = [
+  "boolean", "byte", "char", "short", "int", "long", "float", "double"
+])
+
+public class Array6 {
+
+  #foreach($type of $lowtypes)
+  public static ${type}[] newAs(${type}[] xs, int n) {
+    return new ${type}[n];
+  }
+  #end
+
+  @SuppressWarnings("unchecked")
+  public static <T> T[] newAs(T[] xs, int n) {
+    return (T[]) Array.newInstance(xs.getClass().getComponentType(), n);
+  }
+}
