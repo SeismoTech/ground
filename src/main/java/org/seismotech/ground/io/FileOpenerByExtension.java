@@ -33,7 +33,7 @@ public class FileOpenerByExtension implements FileOpener {
   @Override
   public InputStream inputStream(Path path) throws IOException {
     final List<Tuple2<String,OpenDriver>> chain = new ArrayList<>(2);
-    for (final String ext: Extensions.of(path)) {
+    for (final String ext: Extension.allOf(path)) {
       final OpenDriver d = driverFor(ext);
       if (d == null) break;
       chain.add(Tuple2.of(ext,d));
