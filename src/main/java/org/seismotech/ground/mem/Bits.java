@@ -55,6 +55,22 @@ public class Bits {
     LE16_ON_BYTES.set(xs, off, (short) v);
   }
 
+  public static final VarHandle BE16_ON_BYTES
+    = MethodHandles.byteArrayViewVarHandle(
+      short[].class, ByteOrder.BIG_ENDIAN);
+
+  public static short be16(byte[] xs, int off) {
+    return (short) BE16_ON_BYTES.get(xs, off);
+  }
+
+  public static void be16(byte[] xs, int off, short v) {
+    BE16_ON_BYTES.set(xs, off, v);
+  }
+
+  public static void be16(byte[] xs, int off, char v) {
+    BE16_ON_BYTES.set(xs, off, (short) v);
+  }
+
   public static final VarHandle LE32_ON_BYTES
     = MethodHandles.byteArrayViewVarHandle(
       int[].class, ByteOrder.LITTLE_ENDIAN);
@@ -88,6 +104,40 @@ public class Bits {
     illegalTailWidth(3, width);
   }
 
+  public static final VarHandle BE32_ON_BYTES
+    = MethodHandles.byteArrayViewVarHandle(
+      int[].class, ByteOrder.BIG_ENDIAN);
+
+  public static int be32(byte[] xs, int off) {
+    return (int) BE32_ON_BYTES.get(xs, off);
+  }
+
+  public static void be32(byte[] xs, int off, int v) {
+    BE32_ON_BYTES.set(xs, off, v);
+  }
+
+  public static int be32tail(byte[] xs, int off, int width) {
+    int tail = 0, i = off;
+    switch (width) {
+    case 3: tail |= ubyte(xs[i++]) << 16;
+    case 2: tail |= ubyte(xs[i++]) << 8;
+    case 1: tail |= ubyte(xs[i]);
+    case 0: return tail;
+    }
+    return illegalTailWidth(3, width);
+  }
+
+  public static void be32tail(byte[] xs, int off, int width, int v) {
+    int i = off;
+    switch (width) {
+    case 3: xs[i++] = (byte) (v >>> 16);
+    case 2: xs[i++] = (byte) (v >>> 8);
+    case 1: xs[i] = (byte) v;
+    case 0: return;
+    }
+    illegalTailWidth(3, width);
+  }
+
   public static final VarHandle LE64_ON_BYTES
     = MethodHandles.byteArrayViewVarHandle(
       long[].class, ByteOrder.LITTLE_ENDIAN);
@@ -111,6 +161,81 @@ public class Bits {
       off += 4;  width -= 4;  v >>>= 32;
     }
     le32tail(xs, off, width, (int) v);
+  }
+
+  public static final VarHandle BE64_ON_BYTES
+    = MethodHandles.byteArrayViewVarHandle(
+      long[].class, ByteOrder.BIG_ENDIAN);
+
+  public static long be64(byte[] xs, int off) {
+    return (long) BE64_ON_BYTES.get(xs, off);
+  }
+
+  public static void be64(byte[] xs, int off, long v) {
+    BE64_ON_BYTES.set(xs, off, v);
+  }
+
+  public static long be64tail(byte[] xs, int off, int width) {
+    return (width < 4) ? be32tail(xs, off, width)
+      : (uint(be32tail(xs, off, width-4)) << 32)
+      | uint(be32(xs, off + (width-4)));
+  }
+
+  public static void be64tail(byte[] xs, int off, int width, long v) {
+    if (width >= 4) {
+      final int tail = width - 4;
+      be32(xs, off, (int) (v >>> 8*tail));
+      off += 4;  width = tail;
+    }
+    be32tail(xs, off, width, (int) v);
+  }
+
+  public static final VarHandle BEF_ON_BYTES
+    = MethodHandles.byteArrayViewVarHandle(
+      float[].class, ByteOrder.BIG_ENDIAN);
+
+  public static float bef(byte[] xs, int off) {
+    return (float) BEF_ON_BYTES.get(xs, off);
+  }
+
+  public static void bef(byte[] xs, int off, float v) {
+    BEF_ON_BYTES.set(xs, off, v);
+  }
+
+  public static final VarHandle LEF_ON_BYTES
+    = MethodHandles.byteArrayViewVarHandle(
+      float[].class, ByteOrder.LITTLE_ENDIAN);
+
+  public static float lef(byte[] xs, int off) {
+    return (float) LEF_ON_BYTES.get(xs, off);
+  }
+
+  public static void lef(byte[] xs, int off, float v) {
+    LEF_ON_BYTES.set(xs, off, v);
+  }
+
+  public static final VarHandle BED_ON_BYTES
+    = MethodHandles.byteArrayViewVarHandle(
+      double[].class, ByteOrder.BIG_ENDIAN);
+
+  public static double bed(byte[] xs, int off) {
+    return (double) BED_ON_BYTES.get(xs, off);
+  }
+
+  public static void bed(byte[] xs, int off, double v) {
+    BED_ON_BYTES.set(xs, off, v);
+  }
+
+  public static final VarHandle LED_ON_BYTES
+    = MethodHandles.byteArrayViewVarHandle(
+      double[].class, ByteOrder.LITTLE_ENDIAN);
+
+  public static double led(byte[] xs, int off) {
+    return (double) LED_ON_BYTES.get(xs, off);
+  }
+
+  public static void led(byte[] xs, int off, double v) {
+    LED_ON_BYTES.set(xs, off, v);
   }
 
   //----------------------------------------------------------------------
