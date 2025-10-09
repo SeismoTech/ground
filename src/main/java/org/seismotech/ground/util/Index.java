@@ -35,6 +35,8 @@ public class Index {
 
   public static boolean wasFound(int p) {return 0 <= p;}
   public static int effective(int p) {return wasFound(p) ? p : flip(p);}
+  public static int insertion(int p) {return wasFound(p) ? p : flip(p);}
+  public static int floor(int p) {return wasFound(p) ? p : -p-2;}
 
   private static int flip(int a) {return -(a+1);}
 }

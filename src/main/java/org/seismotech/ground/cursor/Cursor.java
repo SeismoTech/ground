@@ -20,4 +20,6 @@ package org.seismotech.ground.cursor;
  */
 public interface Cursor {
   boolean advance();
+
+  default void reset() {throw new UnsupportedOperationException();}
 }

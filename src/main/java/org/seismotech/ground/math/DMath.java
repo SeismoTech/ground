@@ -12,11 +12,23 @@ public class DMath {
     return (n + d - 1) / d;
   }
 
+  public static long cdiv(long n, long d) {
+    return (n + d - 1) / d;
+  }
+
   public static int ceil(int n, int d) {
     return d * cdiv(n,d);
   }
 
+  public static long ceil(long n, long d) {
+    return d * cdiv(n,d);
+  }
+
   public static int multiples(int d, int from, int to) {
+    return (to-1)/d - cdiv(from,d) + 1;
+  }
+
+  public static long multiples(long d, long from, long to) {
     return (to-1)/d - cdiv(from,d) + 1;
   }
 

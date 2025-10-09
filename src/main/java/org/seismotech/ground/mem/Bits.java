@@ -33,7 +33,13 @@ public class Bits {
   private static int illegalTailWidth(int max, int width) {
     throw new IllegalArgumentException(
       "A tail scanner called with tail width " + width
-      + ", but a value in the range [0," + max + "] expected");
+      + ", but expecting a width in the range [0," + max + "]");
+  }
+
+  private static int illegalVarWidth(int max, int width) {
+    throw new IllegalArgumentException(
+      "A variable scanner called with width " + width
+      + ", but expecting a width in the range [0," + max + "]");
   }
 
   //----------------------------------------------------------------------
@@ -94,6 +100,18 @@ public class Bits {
     return illegalTailWidth(3, width);
   }
 
+  public static int le32var(byte[] xs, int off, int width) {
+    int tail = 0;
+    switch (width) {
+    case 4: return le32(xs, off);
+    case 3: tail |= ubyte(xs[off+2]) << 16;
+    case 2: tail |= ubyte(xs[off+1]) << 8;
+    case 1: tail |= ubyte(xs[off]);
+    case 0: return tail;
+    }
+    return illegalVarWidth(4, width);
+  }
+
   public static void le32tail(byte[] xs, int off, int width, int v) {
     switch (width) {
     case 3: xs[off+2] = (byte) (v >>> 16);
@@ -102,6 +120,17 @@ public class Bits {
     case 0: return;
     }
     illegalTailWidth(3, width);
+  }
+
+  public static void le32var(byte[] xs, int off, int width, int v) {
+    switch (width) {
+    case 4: le32(xs, off, v); return;
+    case 3: xs[off+2] = (byte) (v >>> 16);
+    case 2: xs[off+1] = (byte) (v >>> 8);
+    case 1: xs[off] = (byte) v;
+    case 0: return;
+    }
+    illegalVarWidth(4, width);
   }
 
   public static final VarHandle BE32_ON_BYTES
@@ -127,6 +156,18 @@ public class Bits {
     return illegalTailWidth(3, width);
   }
 
+  public static int be32var(byte[] xs, int off, int width) {
+    int tail = 0, i = off;
+    switch (width) {
+    case 4: return be32(xs, i);
+    case 3: tail |= ubyte(xs[i++]) << 16;
+    case 2: tail |= ubyte(xs[i++]) << 8;
+    case 1: tail |= ubyte(xs[i]);
+    case 0: return tail;
+    }
+    return illegalVarWidth(4, width);
+  }
+
   public static void be32tail(byte[] xs, int off, int width, int v) {
     int i = off;
     switch (width) {
@@ -136,6 +177,18 @@ public class Bits {
     case 0: return;
     }
     illegalTailWidth(3, width);
+  }
+
+  public static void be32var(byte[] xs, int off, int width, int v) {
+    int i = off;
+    switch (width) {
+    case 4: be32(xs, i, v); return;
+    case 3: xs[i++] = (byte) (v >>> 16);
+    case 2: xs[i++] = (byte) (v >>> 8);
+    case 1: xs[i] = (byte) v;
+    case 0: return;
+    }
+    illegalVarWidth(4, width);
   }
 
   public static final VarHandle LE64_ON_BYTES
@@ -155,12 +208,25 @@ public class Bits {
       : uint(le32(xs, off)) | (uint(le32tail(xs, off+4, width-4)) << 32);
   }
 
+  public static long le64var(byte[] xs, int off, int width) {
+    return (width < 4) ? le32tail(xs, off, width)
+      : uint(le32(xs, off)) | (uint(le32var(xs, off+4, width-4)) << 32);
+  }
+
   public static void le64tail(byte[] xs, int off, int width, long v) {
     if (width >= 4) {
       le32(xs, off, (int) v);
       off += 4;  width -= 4;  v >>>= 32;
     }
     le32tail(xs, off, width, (int) v);
+  }
+
+  public static void le64var(byte[] xs, int off, int width, long v) {
+    if (width >= 4) {
+      le32(xs, off, (int) v);
+      off += 4;  width -= 4;  v >>>= 32;
+    }
+    le32var(xs, off, width, (int) v);
   }
 
   public static final VarHandle BE64_ON_BYTES
@@ -181,6 +247,12 @@ public class Bits {
       | uint(be32(xs, off + (width-4)));
   }
 
+  public static long be64var(byte[] xs, int off, int width) {
+    return (width < 4) ? be32tail(xs, off, width)
+      : (uint(be32var(xs, off, width-4)) << 32)
+      | uint(be32(xs, off + (width-4)));
+  }
+
   public static void be64tail(byte[] xs, int off, int width, long v) {
     if (width >= 4) {
       final int tail = width - 4;
@@ -188,6 +260,15 @@ public class Bits {
       off += 4;  width = tail;
     }
     be32tail(xs, off, width, (int) v);
+  }
+
+  public static void be64var(byte[] xs, int off, int width, long v) {
+    if (width >= 4) {
+      final int tail = width - 4;
+      be32(xs, off, (int) (v >>> 8*tail));
+      off += 4;  width = tail;
+    }
+    be32var(xs, off, width, (int) v);
   }
 
   public static final VarHandle BEF_ON_BYTES
