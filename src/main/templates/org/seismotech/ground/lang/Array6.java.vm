@@ -18,4 +18,15 @@ public class Array6 {
   public static <T> T[] newAs(T[] xs, int n) {
     return (T[]) Array.newInstance(xs.getClass().getComponentType(), n);
   }
+
+  #foreach($type of $lowtypes)
+  public static ${type}[] concat(${type}[]... xss) {
+    int n = 0;
+    for (final ${type}[] xs: xss) n += xs.length;
+    final ${type}[] rs = new ${type}[n];
+    int k = 0;
+    for (final ${type}[] xs: xss) for (final ${type} x: xs) rs[k++] = x;
+    return rs;
+  }
+  #end
 }
