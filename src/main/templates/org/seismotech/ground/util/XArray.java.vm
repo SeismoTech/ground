@@ -87,10 +87,12 @@ public class XArray {
       + free + " additional free slots: it will exceed the max int value");
   }
 
+  #foreach($T in $lowtypes)
+
   /**
    * Equivalent to {@code growFree(xs, length(xs), used, free)}.
    */
-  public static byte[] growFree(byte[] xs, int used, int free) {
+  public static ${T}[] growFree(${T}[] xs, int used, int free) {
     return growFree(xs, length(xs), used, free);
   }
 
@@ -103,10 +105,12 @@ public class XArray {
    * The array {@code xs} might be {@code null},
    * but only if {@code used} is 0.
    */
-  public static byte[] growFree(byte[] xs, int size, int used, int free) {
+  public static ${T}[] growFree(${T}[] xs, int size, int used, int free) {
     final int newsize = growSize(size, used, free);
-    final byte[] ys = new byte[newsize];
+    final ${T}[] ys = new ${T}[newsize];
     if (xs != null) System.arraycopy(xs,0, ys,0, used);
     return ys;
   }
+
+  #end
 }
