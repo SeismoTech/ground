@@ -4,6 +4,8 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Deque;
 import java.util.ArrayDeque;
 
@@ -165,6 +167,8 @@ public class PrettyPrinter {
     return println();
   }
 
+  public PrettyPrinter printNull() {return raw("null");}
+
   public PrettyPrinter print(int n) {
     flushPending();
     out.print(n);
@@ -246,6 +250,55 @@ public class PrettyPrinter {
       flushPending();
       out.write(cs, init, end-init);
     }
+    return this;
+  }
+
+  //----------------------------------------------------------------------
+  public PrettyPrinter print(Object x) {
+    switch (x) {
+    case null -> printNull();
+    case PrettyPrintable ppable -> print(ppable);
+    case Object[] it -> print(Arrays.asList(it));
+    case Iterable it -> print(it);
+    case Map map -> print(map);
+    default -> print(x.toString());
+    }
+    return this;
+  }
+
+  public PrettyPrinter print(PrettyPrintable ppable) {
+    return ppable.prettyPrint(this);
+  }
+
+  public PrettyPrinter print(Map<?,?> map) {
+    return print("[", "\n]", "\n- ", ": ", map);
+  }
+
+  public PrettyPrinter print(String open, String close, String item, String sep,
+      Map<?,?> map) {
+    print(open).in();
+    for (final Map.Entry<?,?> entry: map.entrySet()) {
+      print(entry.getKey()).print(sep).in().print(entry.getValue()).out();
+    }
+    out().print(close);
+    return this;
+  }
+
+  public PrettyPrinter print(Iterable<?> xs) {
+    return print("[", "\n]",
+        (pp, i) -> pp.println().print(i+1).print(". "), xs);
+  }
+
+  public PrettyPrinter print(String open, String close,
+      PrettyPrintable.Enumerated item, Iterable<?> xs) {
+    print(open).in();
+    int i = 0;
+    for (final Object x: xs) {
+      item.prettyPrint(this, i);
+      print(x);
+      i++;
+    }
+    out().print(close);
     return this;
   }
 
