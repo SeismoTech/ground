@@ -17,10 +17,11 @@ import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.function.Predicate;
-import java.util.function.Consumer;
 
+import org.seismotech.ground.lang.XException;
 import org.seismotech.ground.lang.ExceptionCollector;
 import org.seismotech.ground.io.MultiIOException;
+import org.seismotech.ground.io.function.IOConsumer;
 import org.seismotech.ground.util.Tuple2;
 import org.seismotech.ground.service.TerminationBarrier;
 
@@ -28,14 +29,16 @@ public class TraversalWatcherMachine {
 
   private final List<Path> roots;
   private final Predicate<Path> accept;
-  private final Consumer<WatchEvent> listener;
+  private final IOConsumer<WatchEvent> listener;
+  private ExceptionCollector<IOException> errors;
   private Forest lastSnapshot;
 
   public TraversalWatcherMachine(List<Path> roots,
-      Predicate<Path> accept, Consumer<WatchEvent> listener) {
+      Predicate<Path> accept, IOConsumer<WatchEvent> listener) {
     this.roots = new ArrayList<>(roots);
     this.accept = accept;
     this.listener = listener;
+    this.errors = new ExceptionCollector<>(MultiIOException::new);
     this.lastSnapshot = Forest.empty(roots);
   }
 
@@ -43,18 +46,21 @@ public class TraversalWatcherMachine {
     final Forest current = snapshot();
     emitChanges(lastSnapshot, current);
     lastSnapshot = current;
-    if (current.errors.has()) throw current.errors.exception();
+    if (errors.has()) throw errors.exception();
   }
 
-  private Forest snapshot() throws IOException {
+  private Forest snapshot() {
     final Forest current = Forest.empty();
     final ForestBuilder fb = new ForestBuilder();
     for (final Path root: roots) {
-      Files.walkFileTree(
-        root, Set.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, fb);
-      current.add(root, fb.lastEntry != null ? fb.lastEntry : new Dir(root));
+      try {
+        Files.walkFileTree(
+          root, Set.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, fb);
+        current.add(root, fb.lastEntry != null ? fb.lastEntry : new Dir(root));
+      } catch (IOException e) {
+        errors.add(e);
+      }
     }
-    current.errors = fb.errors;
     return current;
   }
 
@@ -158,29 +164,33 @@ public class TraversalWatcherMachine {
   }
 
   private void emitCreate(Path path, File file) {
-    emit(path, file, WatchCase.CREATE);
+    emit(path, file, WatchAction.CREATE);
   }
 
   private void emitDelete(Path path, File file) {
-    emit(path, file, WatchCase.DELETE);
+    emit(path, file, WatchAction.DELETE);
   }
 
   private void emitModify(Path path, File file) {
-    emit(path, file, WatchCase.MODIFY);
+    emit(path, file, WatchAction.MODIFY);
   }
 
-  private void emit(Path path, File file, WatchCase what) {
-    listener.accept(new WatchEvent(what, file.attr));
+  private void emit(Path path, File file, WatchAction what) {
+    try {
+      listener.accept(new WatchEvent(what, file.attr));
+    } catch (IOException e) {
+      errors.add(e);
+    } catch (RuntimeException e) {
+      errors.add(XException.wrap(IOException.class, e));
+    }
   }
 
   //----------------------------------------------------------------------
   private static class Forest {
     final Map<Path,Entry> roots;
-    ExceptionCollector<IOException> errors;
 
     Forest() {
       this.roots = new HashMap<>();
-      this.errors = null;
     }
 
     static Forest empty() {return new Forest();}
@@ -197,10 +207,6 @@ public class TraversalWatcherMachine {
     void add(Path root, Entry entry) {
       roots.put(root, entry);
     }
-
-    // void sort() {
-    //   Collections.sort(roots, (a,b) -> a._1().compareTo(b._1()));
-    // }
   }
 
   private static sealed abstract class Entry permits File, Dir {
@@ -241,14 +247,12 @@ public class TraversalWatcherMachine {
 
   private class ForestBuilder implements FileVisitor<Path> {
     final Instant initTime;
-    final ExceptionCollector<IOException> errors;
     final Stack<Dir> outerDirs;
     Entry lastEntry;
     Dir dir;
 
     ForestBuilder() {
       this.initTime = Instant.now();
-      this.errors = new ExceptionCollector<>(MultiIOException::new);
       this.outerDirs = new Stack<>();
       this.lastEntry = null;
       this.dir = null;

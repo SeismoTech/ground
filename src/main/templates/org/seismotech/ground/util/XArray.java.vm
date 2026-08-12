@@ -3,11 +3,17 @@ package org.seismotech.ground.util;
 #set($lowtypes = [
   "boolean", "byte", "short", "char", "int", "long", "float", "double"
 ])
+
 #set($alltypes = $ppy.table(
   ["name", "arg"],
   $ppy.transpose([$ppy.concat(["T"], $lowtypes), ["<T>"]], "")))
 
+#set($fulltypes = $ppy.concat(["comparable", "comparator"], $lowtypes))
+
 import java.util.Arrays;
+import java.util.Comparator;
+
+import org.seismotech.ground.lang.Comparisons;
 
 public class XArray {
   private XArray() {}
@@ -110,6 +116,67 @@ public class XArray {
     final ${T}[] ys = new ${T}[newsize];
     if (xs != null) System.arraycopy(xs,0, ys,0, used);
     return ys;
+  }
+
+  #end
+
+  //----------------------------------------------------------------------
+  #foreach($name int $fulltypes)
+  #if($name == "comparable")
+    #set($type = "T")
+    #set($arg = "<T extends Comparable<T>>")
+    #set($Classname = "Lex")
+  #elseif($name == "comparator")
+    #set($type = "T")
+    #set($arg = "<T>")
+    #set($Classname = "LexUsing")
+  #else
+    #set($type = $name)
+    #set($arg = "")
+    #set($Classname = "Lex${ppy.capitalize($name)}")
+  #end
+
+  public static class $Classname$arg implements Comparator<${type}[]> {
+
+    @Override
+    public int compare(${type}[] a, ${type}[] b) {
+      return a == null
+        ? b != null ? -1 : 0
+        : b == null ? 1 : nnCompare(a, b);
+    }
+
+    public int nnCompare(${type}[] a, ${type}[] b) {
+      final int min = Math.min(a.length, b.length);
+      for (int i = 0; i < min; i++) {
+        final int c = cmp(a[i], b[i]);
+        if (c != 0) return c;
+      }
+      return Comparisons.cmp(a.length, b.length);
+    }
+
+    #if($name == "comparator")
+
+    private final Comparator<T> cmp;
+
+    public ${Classname}(Comparator<T> cmp) {this.cmp = cmp;}
+
+    private int cmp($type a, $type b) {
+      return Comparisons.cmp(cmp, a, b);
+    }
+
+    #else
+
+    private int cmp($type a, $type b) {
+      return Comparisons.cmp(a, b);
+    }
+
+    #if($name == "comparable")
+    public static final $Classname<String> STRINGS = new $Classname<>();
+    #else
+    public static final $Classname THE = new ${Classname}();
+    #end
+
+    #end
   }
 
   #end

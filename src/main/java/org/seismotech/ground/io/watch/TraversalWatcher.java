@@ -4,12 +4,12 @@ import java.io.InterruptedIOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.function.Consumer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.seismotech.ground.io.function.IOConsumer;
 import org.seismotech.ground.time.Metronome;
 import org.seismotech.ground.service.TerminationBarrier;
 
@@ -26,7 +26,7 @@ public class TraversalWatcher implements Watcher {
   private final TerminationBarrier termination;
 
   public TraversalWatcher(List<Path> roots, long periodNanos,
-      Predicate<Path> accept, Consumer<WatchEvent> listener) {
+      Predicate<Path> accept, IOConsumer<WatchEvent> listener) {
     this.machine = new TraversalWatcherMachine(roots, accept, listener);
     this.periodNanos = periodNanos;
     this.thread = null;
@@ -38,12 +38,13 @@ public class TraversalWatcher implements Watcher {
     return status;
   }
 
-  public synchronized void start(ThreadFactory threads) {
+  public synchronized TraversalWatcher start(ThreadFactory threads) {
     switch (status) {
     case CREATED -> _start(threads);
     case RUNNING -> {}
     default -> _cannotStart();
     }
+    return this;
   }
 
   @Override
@@ -71,6 +72,7 @@ public class TraversalWatcher implements Watcher {
   private void _start(ThreadFactory threads) {
     thread = threads.newThread(this::run);
     status = RunningStatus.RUNNING;
+    thread.start();
   }
 
   private void _done() {
@@ -88,14 +90,19 @@ public class TraversalWatcher implements Watcher {
     final Metronome metro = Metronome
       .aligned(periodNanos, TimeUnit.NANOSECONDS)
       .mode(Metronome.DelayMode.NEXT_PERIOD);
+    loop:
     do {
       try {
         machine.traverse();
-        metro.sleep();
-      } catch (InterruptedException|InterruptedIOException e) {
-        break;
+      } catch (InterruptedIOException e) {
+        break loop;
       } catch (Exception e) {
         logger.log(Level.WARNING, "Traversal failure: " + e.getMessage(), e);
+      }
+      try {
+        metro.sleep();
+      } catch (InterruptedException e) {
+        break loop;
       }
     } while (status == RunningStatus.RUNNING);
     synchronized (this) {_done();}

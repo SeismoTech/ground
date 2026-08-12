@@ -33,6 +33,8 @@ public class CartesianCursor<A extends Cursor, B extends Cursor, T>
         (c1,c2) -> Tuple2.of(c1.value(), c2.value()));
   }
 
+  @Override public Status status() {return cursor1.status();}
+
   @Override public void reset() {
     cursor1.reset();
     cursor2.reset();

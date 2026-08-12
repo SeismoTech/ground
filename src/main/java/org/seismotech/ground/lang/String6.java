@@ -2,7 +2,7 @@ package org.seismotech.ground.lang;
 
 public class String6 {
 
-
+  //----------------------------------------------------------------------
   public static final String DEFAULT_PADDING = " ";
 
   public static String padLeft(String str, int width) {
@@ -56,5 +56,16 @@ public class String6 {
       trg.append(pad, 0, t);
     }
     return trg;
+  }
+
+  //----------------------------------------------------------------------
+  public static String reversed(String str) {
+    final StringBuilder sb = new StringBuilder(str.length());
+    for (int i = str.length(); i > 0; ) {
+      final int cp = str.codePointBefore(i);
+      sb.appendCodePoint(cp);
+      i -= Character.charCount(cp);
+    }
+    return sb.toString();
   }
 }

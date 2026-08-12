@@ -14,6 +14,8 @@ public class FlatCursor<C extends Cursor> implements CursorOf<C> {
     return new UnnestCursor<>(new FlatCursor<>(cursors));
   }
 
+  @Override public Status status() {return cursors.status();}
+
   @Override public void reset() {
     cursors.reset();
     active = null;

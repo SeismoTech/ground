@@ -17,6 +17,15 @@ public class Extension {
     return (dot == -1) ? null : name.substring(dot+1);
   }
 
+  public static String fullOf(Path path) {
+    return fullOf(path.getFileName().toString());
+  }
+
+  public static String fullOf(String name) {
+    final int dot = name.indexOf('.');
+    return (dot == -1) ? null : name.substring(dot+1);
+  }
+
   public static Iterable<String> allOf(Path path) {
     return allOf(path.getFileName().toString());
   }

@@ -16,10 +16,14 @@ public class ExceptionCollector<E extends Exception> {
 
   public boolean has() {return causes != null;}
 
-  public E exception() {
-    return causes == null ? null
+  public E exception() {return exception(true);}
+
+  public E exception(boolean reset) {
+    final E error = causes == null ? null
       : causes.size() == 1 ? causes.get(0)
       : newMulti.apply(new ExceptionBundle<>(causes));
+    if (reset) causes = null;
+    return error;
   }
 
   public void add(E cause) {

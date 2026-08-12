@@ -8,6 +8,8 @@ public class UnnestCursor<T> implements CursorOf<T> {
     this.inner = inner;
   }
 
+  @Override public Status status() {return inner.status();}
+
   @Override public void reset() {inner.reset();}
 
   @Override public boolean advance() {return inner.advance();}

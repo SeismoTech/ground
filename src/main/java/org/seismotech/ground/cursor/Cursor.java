@@ -46,6 +46,10 @@ if (!cursor.ended()) {
  * if the cursor has never been advanced.
  */
 public interface Cursor {
+  enum Status {PRISTINE, LOADED, ENDED;}
+
+  default Status status() {throw new UnsupportedOperationException();}
+
   boolean advance();
 
   default void reset() {throw new UnsupportedOperationException();}
