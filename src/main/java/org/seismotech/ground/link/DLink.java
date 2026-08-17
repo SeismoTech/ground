@@ -13,6 +13,6 @@ public interface DLink<L extends DLink<L>> extends Link<L>{
 
     @Override public L prev() {return prv;}
 
-    @Override public void prev(L nxt) {this.prv = prv;}
+    @Override public void prev(L prv) {this.prv = prv;}
   }
 }

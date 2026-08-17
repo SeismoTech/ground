@@ -1,0 +1,14 @@
+package org.seismotech.ground.lang;
+
+#set($schemes = $ppy.table(
+  ["name", "single"],
+  ["RuntimeException", "java.lang.RuntimeException"],
+  ["Error", "java.lang.Error"]
+))
+
+public class Multi {
+
+  #foreach($scheme in $schemes)
+  #parse("src/main/templates/org/seismotech/ground/lang/MultiScheme.vm")
+  #end
+}

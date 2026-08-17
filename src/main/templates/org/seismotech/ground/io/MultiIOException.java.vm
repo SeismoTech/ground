@@ -1,0 +1,8 @@
+package org.seismotech.ground.io;
+
+import java.io.IOException;
+
+import org.seismotech.ground.lang.ExceptionBundle;
+
+#set($scheme = {"name": "MultiIOException", "single": "IOException"})
+#parse("src/main/templates/org/seismotech/ground/lang/MultiScheme.vm")

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.function.Function;
 
-public class ExceptionCollector<E extends Exception> {
+public class ExceptionCollector<E extends Throwable> {
 
   private final Function<ExceptionBundle<E>, ? extends E> newMulti;
   private List<E> causes;

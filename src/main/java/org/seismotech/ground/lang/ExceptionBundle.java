@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 
-public class ExceptionBundle<E extends Exception> {
+public class ExceptionBundle<E extends Throwable> {
   private final List<E> causes;
 
   public ExceptionBundle(List<E> causes) {
