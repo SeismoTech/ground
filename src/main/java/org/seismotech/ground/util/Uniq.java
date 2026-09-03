@@ -21,26 +21,28 @@ import java.util.HashMap;
 public class Uniq<T> {
 
   private final List<T> ks;
-  private final int[] first;
+  private final int[] sel;
   private final int uniq;
 
   public Uniq(List<T> ks) {
     this.ks = ks;
-    this.first = new int[ks.size()];
+    this.sel = new int[ks.size()];
     final Map<T,Integer> k2i = new HashMap<>();
-    int u = 0, j = 0;
+    int j = 0;
     for (final T k: ks) {
       final Integer i = k2i.get(k);
-      if (i != null) first[j] = i;
-      else {u++;  first[j] = j;  k2i.put(k, j);}
+      if (i != null) sel[j] = i;
+      else {final int s = sel[j] = k2i.size();  k2i.put(k, s);}
       j++;
     }
-    this.uniq = u;
+    this.uniq = k2i.size();
   }
+
+  public static <T> Uniq<T> of(List<T> ks) {return new Uniq<>(ks);}
 
   public boolean hasRepetitions() {return uniqCount() < totalSize();}
 
-  public int totalSize() {return first.length;}
+  public int totalSize() {return sel.length;}
 
   public int uniqCount() {return uniq;}
 
@@ -51,23 +53,41 @@ public class Uniq<T> {
     final List<T> uks = new ArrayList<>(uniq);
     int j = 0;
     for (final T k: ks) {
-      if (first[j] == j) uks.add(k);
+      if (sel[j] == uks.size()) uks.add(k);
       j++;
     }
     return uks;
   }
 
-  public List<T> expand(List<T> vs) {
+  public <V> List<V> expand(List<V> vs) {
     if (vs.size() != uniq) uniqMismatch("expand", vs);
     if (!hasRepetitions()) return vs;
-    final List<T> xvs = new ArrayList<>(first.length);
-    for (int i = 0; i < first.length; i++) xvs.add(vs.get(first[i]));
+    final List<V> xvs = new ArrayList<>(sel.length);
+    for (int i = 0; i < sel.length; i++) xvs.add(vs.get(sel[i]));
     return xvs;
   }
 
-  private void uniqMismatch(String what, List<T> vs) {
-    throw new IllegalArgumentException(
-      "Cannot " + what + " a list of length " + vs.size()
-      + "; its length must be the amount of unique entries " + uniq);
+  public <V> List<V> expand(int times, List<V> vs) {
+    if (vs.size() != uniq * times) uniqMismatch("expand", times, vs);
+    if (!hasRepetitions()) return vs;
+    final List<V> xvs = new ArrayList<>(sel.length * times);
+    for (int i = 0; i < sel.length; i++) {
+      for (int j = 0; j < times; j++) {
+        xvs.add(vs.get(sel[i] * times + j));
+      }
+    }
+    return xvs;
+  }
+
+  private void uniqMismatch(String what, List<?> vs) {
+    uniqMismatch(what, 1, vs);
+  }
+
+  private void uniqMismatch(String what, int times, List<?> vs) {
+    String msg = "Cannot " + what + " a list of length " + vs.size()
+      + "; its length must be equals to the amount (" + uniq
+      + ") of unique entries";
+    if (times != 1) msg += " times " + times;
+    throw new IllegalArgumentException(msg);
   }
 }
